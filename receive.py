@@ -1,19 +1,26 @@
 #!/usr/bin/env python
 import pika
+import jsonpickle
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='localhost'))
-channel = connection.channel()
+class TestObject(object):
+	def __init__(self, name):
+		self.name = name
 
-channel.queue_declare(queue='hello')
+if __name__ == "__main__":
 
-print ' [*] Waiting for messages. To exit press CTRL+C'
+	connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host='localhost'))
+	channel = connection.channel()
 
-def callback(ch, method, properties, body):
-    print " [x] Received %r" % (body,)
+	channel.queue_declare(queue='hello')
 
-channel.basic_consume(callback,
+	print ' [*] Waiting for messages. To exit press CTRL+C'
+
+	def callback(ch, method, properties, body):
+		print " [x] Received " + jsonpickle.decode(body).name
+
+	channel.basic_consume(callback,
                       queue='hello',
                       no_ack=True)
 
-channel.start_consuming()
+	channel.start_consuming()

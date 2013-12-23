@@ -1,15 +1,26 @@
 #!/usr/bin/env python
 import pika
+import jsonpickle
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(
+class TestObject(object):
+	def __init__(self, name):
+		self.name = name
+
+def send_message(message):
+	channel.basic_publish(exchange='',
+                          routing_key='hello',
+                          body=jsonpickle.encode(message))
+	print " [x] Sent " + jsonpickle.encode(message)
+
+
+
+if __name__ == "__main__":
+	connection = pika.BlockingConnection(pika.ConnectionParameters(
                'localhost'))
-channel = connection.channel()
+	channel = connection.channel()
 
-channel.queue_declare(queue='hello')
+	channel.queue_declare(queue='hello')
 
-channel.basic_publish(exchange='',
-                      routing_key='hello',
-                      body='Hello World!')
-print " [x] Sent 'Hello World!'"
+	send_message(TestObject("Hello World JSON serialize!"))
 
-connection.close()
+	connection.close()
